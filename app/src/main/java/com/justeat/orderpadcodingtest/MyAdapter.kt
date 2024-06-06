@@ -13,10 +13,10 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import okhttp3.HttpUrl.Companion.toHttpUrl
 
 
-class MyAdapter(val list: MutableList<Product>, val context: Context) :
+class MyAdapter(var list: MutableList<Product>, val context: Context) :
     RecyclerView.Adapter<MyAdapter.MyViewHolder>() {
     fun addList(productList: List<Product>) {
-        list.addAll(productList)
+        list = productList.toMutableList()
         notifyDataSetChanged()
     }
 
@@ -40,8 +40,8 @@ class MyAdapter(val list: MutableList<Product>, val context: Context) :
             val thumbnail = view.findViewById<ImageView>(R.id.product_thumbnail)
 
 
-            title.text = product.title!!
-            subTitle.text = product.title!!
+            title.text = product.title
+            subTitle.text = product.category!!
             Thread {
                 val image = BitmapFactory.decodeStream(
                     product.thumbnail!!.toHttpUrl().toUrl().openConnection().getInputStream()

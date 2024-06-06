@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var errorTextView: TextView
     lateinit var refreshButton: Button
 
-    var myAdapter = MyAdapter(mutableListOf(), this)
+    val myAdapter = MyAdapter(mutableListOf(), this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,45 +46,19 @@ class MainActivity : AppCompatActivity() {
         fetchItems()
     }
 
-    // URLS
-    private val urlSearchMobile = "https://dummyjson.com/products/?search=Mobile"
-    private val urlSearchLaptop = "https://dummyjson.com/products/?search=Laptop"
 
-    // API key
-    private val apiKey by lazy { getString(R.string.api_key) }
 
     fun fetchItems() {
         errorTextView.isVisible = false
         swipeRefreshLayout.isRefreshing = true
 
-        val client = OkHttpClient()
-
-        val request: Request = Request.Builder()
-            .url(urlSearchMobile)
-            .addHeader("API_KEY", apiKey)
-            .build()
-
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                runOnUiThread {
-                    swipeRefreshLayout.isRefreshing = false
-                    errorTextView.isVisible = true
-                }
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                val gson = Gson()
-
-                val productList =
-                    gson.fromJson(response.body!!.string(), ProductResponse::class.java)
-
-                runOnUiThread {
-                    swipeRefreshLayout.isRefreshing = false
-                    errorTextView.isVisible = false
-                    recyclerView.adapter =
-                        MyAdapter(productList.products.toMutableList(), this@MainActivity)
-                }
-            }
+        Network().fetch(this,{productList->
+            swipeRefreshLayout.isRefreshing = false
+            errorTextView.isVisible = false
+            myAdapter.addList(productList.products.toMutableList())
+        },{
+            swipeRefreshLayout.isRefreshing = false
+            errorTextView.isVisible = true
         })
     }
 }

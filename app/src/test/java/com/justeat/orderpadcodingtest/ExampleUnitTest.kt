@@ -2,15 +2,20 @@ package com.justeat.orderpadcodingtest
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import io.mockk.coEvery
+import io.mockk.every
+import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.setMain
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
@@ -64,6 +69,10 @@ class MyViewModel(private val repository: Repository) : ViewModel() {
 @ExperimentalCoroutinesApi
 class TestViewModel {
 
+    val repo :Repository= mockk()
+
+    val vm = MyViewModel(repo)
+
     @Before
     fun setup() {
         Dispatchers.setMain(UnconfinedTestDispatcher())
@@ -71,8 +80,11 @@ class TestViewModel {
 
     @Test
     fun writeTestHere() = runBlocking {
-        TODO("Not yet implemented")
-        return@runBlocking
+        coEvery { repo.getProductData(any()) } returns Response.Success("Hi")
+
+        vm.refreshData()
+
+        Assert.assertEquals("HiHi", vm.state.first().output, )
     }
 
 }
